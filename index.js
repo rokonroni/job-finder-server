@@ -24,6 +24,19 @@ async function setupServer() {
     await client.connect();
     console.log("Connected to MongoDB");
 
+    const AllJobsCollection = client.db("jobFinderDB").collection("allJobs");
+
+     app.get("/allJobs", async (req, res) => {
+      const cursor = AllJobsCollection.find();
+      const result = await cursor.toArray();
+      res.send(result);
+    });
+    app.get("/jobDetails/:id", async (req, res) => {
+      const id = req.params.id;
+      const query = { _id: new ObjectId(id) };
+      const result = await AllJobsCollection.findOne(query);
+      res.send(result);
+    });
 
     app.get("/", (req, res) => {
       res.send("Job Finder server is running");
