@@ -37,6 +37,11 @@ async function setupServer() {
       const result = await AllJobsCollection.findOne(query);
       res.send(result);
     });
+    app.post("/alljobs", async (req, res) => {
+      const newJobs = req.body;
+      const result = await AllJobsCollection.insertOne(newJobs);
+      res.send(result);
+    });
 
     app.get("/", (req, res) => {
       res.send("Job Finder server is running");
