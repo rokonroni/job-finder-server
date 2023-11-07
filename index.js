@@ -37,11 +37,23 @@ async function setupServer() {
       const result = await AllJobsCollection.findOne(query);
       res.send(result);
     });
+
     app.post("/alljobs", async (req, res) => {
       const newJobs = req.body;
       const result = await AllJobsCollection.insertOne(newJobs);
       res.send(result);
     });
+
+    app.get('/myJobs', async (req, res)=>{
+      console.log(req.query.email);
+      let query = {};
+      if(req.query?.email){
+        query= {email: req.query.email}
+      }
+      const cursor = AllJobsCollection.find();
+      const result = await cursor.toArray();
+      res.send(result);
+    })
 
     app.get("/", (req, res) => {
       res.send("Job Finder server is running");
