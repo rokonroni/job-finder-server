@@ -6,9 +6,11 @@ const app = express();
 const port = process.env.PORT || 5000;
 
 // middleware
-app.use(cors({
-  origin: 'http://localhost:5173' 
-}));
+app.use(
+  cors({
+    origin: "http://localhost:5173",
+  })
+);
 app.use(express.json());
 
 const uri = `mongodb+srv://${process.env.DB_USER}:${process.env.DB_PASS}@cluster0.8sb7n8j.mongodb.net/?retryWrites=true&w=majority`;
@@ -27,7 +29,9 @@ async function setupServer() {
     console.log("Connected to MongoDB");
 
     const AllJobsCollection = client.db("jobFinderDB").collection("allJobs");
-    const AllApplyJobsCollection = client.db("jobFinderDB").collection("applyJobs");
+    const AllApplyJobsCollection = client
+      .db("jobFinderDB")
+      .collection("applyJobs");
 
     app.get("/allJobs", async (req, res) => {
       const cursor = AllJobsCollection.find();
@@ -88,6 +92,25 @@ async function setupServer() {
       const cursor = AllJobsCollection.find(query);
       const result = await cursor.toArray();
       res.send(result);
+    });
+    app.get("/myAppliedJobs", async (req, res) => {
+      let query = {};
+      if (req.query?.email) {
+        query = { userEmail: req.query.email };
+      }
+      const cursor = AllApplyJobsCollection.find(query);
+      const result = await cursor.toArray();
+      res.send(result);
+    });
+
+    app.post("/updateJobApplicants/:id", async (req, res) => {
+        const id = req.params.id;
+        const query = { _id: new ObjectId(id) };
+        const job = await AllJobsCollection.findOne(query);
+        job.jobApplicantsNumber += 1;
+        const result = await AllJobsCollection.updateOne(query, { $set: job });
+        res.send(result)
+        console.log(result);
     });
 
     app.delete("/myJobs/job/:id", async (req, res) => {
